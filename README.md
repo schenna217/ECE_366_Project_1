@@ -1,1 +1,1 @@
-# ECE_366_Project_1
+# ECE 366 Project 1
