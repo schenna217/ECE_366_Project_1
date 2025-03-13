@@ -98,70 +98,131 @@ module PPA(A, B, Cin, S, Cout);
   wire [15:0] P, G; // Propagate and Generate signals
   wire [15:0] G_Block; // G_(k-1):j
   
-  assign P = A | B;
-  assign G = A & B;
+  assign P = A | B; // Correct propagate signal
+  assign G = A & B; // Generate signal
   
-  wire [7:0] R1, R2, R3, R4; // Block-level signals
+  wire [7:0] RP1, RP2, RP3, RP4; // Block-level propagate signals
+  wire [7:0] RG1, RG2, RG3, RG4; // Block-level generate signals
   
   // Block level signals for first row
-  assign R1[0] = G[0] | (P[0] & Cin);
-  assign R1[1] = G[2] | (P[2] & G[1]);
-  assign R1[2] = G[4] | (P[4] & G[3]);
-  assign R1[3] = G[6] | (P[6] & G[5]);
-  assign R1[4] = G[8] | (P[8] & G[7]);
-  assign R1[5] = G[10] | (P[10] & G[9]);
-  assign R1[6] = G[12] | (P[12] & G[11]);
-  assign R1[7] = G[14] | (P[14] & G[13]);
+  assign RG1[0] = G[0] | (P[0] & Cin);
+  assign RP1[0] = P[0] & 0;
+    
+  assign RG1[1] = G[2] | (P[2] & G[1]);
+  assign RP1[1] = P[2] & P[1];
+    
+  assign RG1[2] = G[4] | (P[4] & G[3]);
+  assign RP1[2] = P[4] & P[3];
+    
+  assign RG1[3] = G[6] | (P[6] & G[5]);
+  assign RP1[3] = P[6] & P[5];
+    
+  assign RG1[4] = G[8] | (P[8] & G[7]);
+  assign RP1[4] = P[8] & P[7];
+    
+  assign RG1[5] = G[10] | (P[10] & G[9]);
+  assign RP1[5] = P[10] & P[9];
+    
+  assign RG1[6] = G[12] | (P[12] & G[11]);
+  assign RP1[6] = P[12] & P[11];
+    
+  assign RG1[7] = G[14] | (P[14] & G[13]);
+  assign RP1[7] = P[14] & P[13];
   
   // Block level signals for second row
-  assign R2[0] = G[1] | (P[1] & R1[0]);
-  assign R2[1] = R1[1] | (R1[1] & R1[0]);
-  assign R2[2] = G[5] | (P[5] & R1[2]);
-  assign R2[3] = R1[3] | (R1[3] & R1[2]);
-  assign R2[4] = G[9] | (P[9] & R1[4]);
-  assign R2[5] = R1[5] | (R1[5] & R1[4]);
-  assign R2[6] = G[13] | (P[13] & R1[6]);
-  assign R2[7] = R1[7] | (R1[7] & R1[6]);
+  assign RG2[0] = G[1] | (P[1] & RG1[0]);
+  assign RP2[0] = P[1] & RP1[0];
+    
+  assign RG2[1] = RG1[1] | (RP1[1] & RG1[0]);
+  assign RP2[1] = RP1[1] & RP1[0];
+  
+  assign RG2[2] = G[5] | (P[5] & RG1[2]);
+  assign RP2[2] = P[5] & RP1[2];
+  
+  assign RG2[3] = RG1[3] | (RP1[3] & RG1[2]);
+  assign RP2[3] = RP1[3] & RP1[2];
+  
+  assign RG2[4] = G[9] | (P[9] & RG1[4]);
+  assign RP2[4] = P[9] & RP1[4];
+  
+  assign RG2[5] = RG1[5] | (RP1[5] & RG1[4]);
+  assign RP2[5] = RP1[5] & RP1[4];
+  
+  assign RG2[6] = G[13] | (P[13] & RG1[6]);
+  assign RP2[6] = P[13] & RP1[6];
+  
+  assign RG2[7] = RG1[7] | (RP1[7] & RG1[6]);
+  assign RP2[7] = RP1[7] & RP1[6];
   
   // Block level signals for third row
-  assign R3[0] = G[3] | (P[3] & R2[1]);
-  assign R3[1] = R1[2] | (R1[2] & R2[1]);
-  assign R3[2] = R2[2] | (R2[2] & R2[1]);
-  assign R3[3] = R2[3] | (R2[3] & R2[1]);
-  assign R3[4] = G[11] | (P[11] & R2[5]);
-  assign R3[5] = R1[6] | (R1[6] & R2[5]);
-  assign R3[6] = R2[6] | (R2[6] & R2[5]);
-  assign R3[7] = R2[7] | (R2[7] & R2[5]);
+  assign RG3[0] = G[3] | (P[3] & RG2[1]);
+  assign RP3[0] = P[3] & RP2[1];
+  
+  assign RG3[1] = RG1[2] | (RP1[2] & RG2[1]);
+  assign RP3[1] = RP1[2] & RP2[1];
+  
+  assign RG3[2] = RG2[2] | (RP2[2] & RG2[1]);
+  assign RP3[2] = RP2[2] & RP2[1];
+  
+  assign RG3[3] = RG2[3] | (RP2[3] & RG2[1]);
+  assign RP3[3] = RP2[3] & RP2[1];
+  
+  assign RG3[4] = G[11] | (P[11] & RG2[5]);
+  assign RP3[4] = P[11] & RP2[5];
+  
+  assign RG3[5] = RG1[6] | (RP1[6] & RG2[5]);
+  assign RP3[5] = RP1[6] & RP2[5];
+  
+  assign RG3[6] = RG2[6] | (RP2[6] & RG2[5]);
+  assign RP3[6] = RP2[6] & RP2[5];
+  
+  assign RG3[7] = RG2[7] | (RP2[7] & RG2[5]);
+  assign RP3[7] = RP2[7] & RP2[5];
   
   // Block level signals for fourth row
-  assign R4[0] = G[7] | (P[7] & R3[3]);
-  assign R4[1] = R1[4] | (R1[4] & R3[3]);
-  assign R4[2] = R2[4] | (R2[4] & R3[3]);
-  assign R4[3] = R2[5] | (R2[5] & R3[3]);
-  assign R4[4] = R3[4] | (R3[4] & R3[3]);
-  assign R4[5] = R3[5] | (R3[5] & R3[3]);
-  assign R4[6] = R3[6] | (R3[6] & R3[3]);
-  assign R4[7] = R3[7] | (R3[7] & R3[3]);
+  assign RG4[0] = G[7] | (P[7] & RG3[3]);
+  assign RP4[0] = P[7] & RP3[3];
+  
+  assign RG4[1] = RG1[4] | (RP1[4] & RG3[3]);
+  assign RP4[1] = RP1[4] & RP3[3];
+  
+  assign RG4[2] = RG2[4] | (RP2[4] & RG3[3]);
+  assign RP4[2] = RP2[4] & RP3[3];
+  
+  assign RG4[3] = RG2[5] | (RP2[5] & RG3[3]);
+  assign RP4[3] = RP2[5] & RP3[3];
+  
+  assign RG4[4] = RG3[4] | (RP3[4] & RG3[3]);
+  assign RP4[4] = RP3[4] & RP3[3];
+  
+  assign RG4[5] = RG3[5] | (RP3[5] & RG3[3]);
+  assign RP4[5] = RP3[5] & RP3[3];
+  
+  assign RG4[6] = RG3[6] | (RP3[6] & RG3[3]);
+  assign RP4[6] = RP3[6] & RP3[3];
+  
+  assign RG4[7] = RG3[7] | (RP3[7] & RG3[3]);
+  assign RP4[7] = RP3[7] & RP3[3];
   
   // Final assignments for G_(k-1):j
   assign G_Block[0] = Cin;
-  assign G_Block[1] = R1[0];
-  assign G_Block[2] = R2[0];
-  assign G_Block[3] = R2[1];
-  assign G_Block[4] = R3[0];
-  assign G_Block[5] = R3[1];
-  assign G_Block[6] = R3[2];
-  assign G_Block[7] = R3[3];
-  assign G_Block[8] = R4[0];
-  assign G_Block[9] = R4[1];
-  assign G_Block[10] = R4[2];
-  assign G_Block[11] = R4[3];
-  assign G_Block[12] = R4[4];
-  assign G_Block[13] = R4[5];
-  assign G_Block[14] = R4[6];
-  assign G_Block[15] = R4[7];
+  assign G_Block[1] = RG1[0];
+  assign G_Block[2] = RG2[0];
+  assign G_Block[3] = RG2[1];
+  assign G_Block[4] = RG3[0];
+  assign G_Block[5] = RG3[1];
+  assign G_Block[6] = RG3[2];
+  assign G_Block[7] = RG3[3];
+  assign G_Block[8] = RG4[0];
+  assign G_Block[9] = RG4[1];
+  assign G_Block[10] = RG4[2];
+  assign G_Block[11] = RG4[3];
+  assign G_Block[12] = RG4[4];
+  assign G_Block[13] = RG4[5];
+  assign G_Block[14] = RG4[6];
+  assign G_Block[15] = RG4[7];
   
   assign S = G_Block ^ (A ^ B);
-  assign Cout = G_Block[15];
+  assign Cout = G[15] | (P[15] & RG4[7]);
   
 endmodule
