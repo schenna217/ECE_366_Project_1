@@ -14,6 +14,11 @@ module tb;
   wire [15:0] S_16bit;
   wire Cout_16bit;
 
+  reg [15:0] A_ksa, B_ksa;
+  reg Cin_ksa;
+  wire [15:0] S_ksa;
+  wire Cout_ksa;
+
   four_bit_RCA_RCS rca_tb (
     .A(A_4bit),
     .B(B_4bit),
@@ -38,6 +43,20 @@ module tb;
     .S(S_16bit),
     .Cout(Cout_16bit)
   );
+
+  KSA ksa_tb (
+    .A(A_ksa),
+    .B(B_ksa),
+    .Cin(Cin_ksa),
+    .S(S_ksa),
+    .Cout(Cout_ksa)
+  );
+
+  // Enable waveform dumping
+  initial begin
+    $dumpfile("waveform.vcd");
+    $dumpvars(0, tb);
+  end
 
   // Test procedure
   initial begin
@@ -160,6 +179,66 @@ module tb;
     $display("Test Case A: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_16bit, B_16bit, Cin_16bit, S_16bit, Cout_16bit);
     
     $display("===== End of 16-bit PPA Testbench =====");
+
+    // Run 16-bit KSA tests
+    $display("===== 16-bit KSA Testbench =====");
+    $display("Test Case N: A =      , B =      , Cin = , S =      , Cout = ");
+    
+    // Test case 0: Zero addition
+    A_ksa = 16'h0000; B_ksa = 16'h0000; Cin_ksa = 0; #10;
+    $display("Test Case 0: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 1: Simple addition
+    A_ksa = 16'h0002; B_ksa = 16'h0003; Cin_ksa = 0; #10;
+    $display("Test Case 1: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 2: Addition with carry-in
+    A_ksa = 16'h0004; B_ksa = 16'h0005; Cin_ksa = 1; #10;
+    $display("Test Case 2: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 3: Maximum value addition
+    A_ksa = 16'hFFFF; B_ksa = 16'h0001; Cin_ksa = 0; #10;
+    $display("Test Case 3: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 4: Random addition
+    A_ksa = 16'h6758; B_ksa = 16'h3241; Cin_ksa = 0; #10;
+    $display("Test Case 4: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 5: Overflow case
+    A_ksa = 16'hFFFF; B_ksa = 16'hFFFF; Cin_ksa = 0; #10;
+    $display("Test Case 5: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 6: Large numbers
+    A_ksa = 16'h9999; B_ksa = 16'h9999; Cin_ksa = 1; #10;
+    $display("Test Case 6: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Additional test cases based on hints
+    
+    // Test case 7: Carry propagation test
+    A_ksa = 16'hF0F0; B_ksa = 16'h0F0F; Cin_ksa = 1; #10;
+    $display("Test Case 7: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 8: Alternating bits pattern
+    A_ksa = 16'hAAAA; B_ksa = 16'h5555; Cin_ksa = 0; #10;
+    $display("Test Case 8: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 9: Testing with carry-in = 1
+    A_ksa = 16'hFFFF; B_ksa = 16'h0000; Cin_ksa = 1; #10;
+    $display("Test Case 9: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 10: Long carry propagation
+    A_ksa = 16'h7FFF; B_ksa = 16'h0001; Cin_ksa = 0; #10;
+    $display("Test Case 10: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 11: Carry propagation case
+    A_ksa = 16'h8000; B_ksa = 16'h8000; Cin_ksa = 0; #10;
+    $display("Test Case 11: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    // Test case 12: Random high-value numbers
+    A_ksa = 16'hDEAD; B_ksa = 16'hBEEF; Cin_ksa = 0; #10;
+    $display("Test Case 12: A = %h, B = %h, Cin = %b, S = %h, Cout = %b", A_ksa, B_ksa, Cin_ksa, S_ksa, Cout_ksa);
+    
+    $display("===== End of 16-bit KSA Testbench =====");
     $finish;
   end
 
