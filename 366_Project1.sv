@@ -226,3 +226,83 @@ module PPA(A, B, Cin, S, Cout);
   assign Cout = G[15] | (P[15] & RG4[7]);
   
 endmodule
+
+module KSA(A, B, Cin, S, Cout);
+  
+  input [15:0] A, B; 
+  input Cin;
+  output [15:0] S;
+  output Cout;
+
+  wire [15:0] P, G; // Propagate and Generate signals
+  wire [15:0] C; // G_(k-1):j
+  
+  assign P = A ^ B; // Propagate signal
+  assign G = A & B; // Generate signal
+  
+  wire [14:0] RP1, RG1;
+  wire [13:0] RP2, RG2;
+  wire [11:0] RP3, RG3;
+  wire [7:0] RG4;
+  
+  genvar i;
+  
+  // Block level signals for first row
+  assign C[0] = Cin;
+  assign RG1[0] = G[0] | (P[0] & Cin);
+  generate
+    for (i = 1; i < 15; i = i + 1) begin
+      assign RG1[i] = G[i] | (P[i] & G[i-1]);
+      assign RP1[i] = P[i] & P[i-1];
+    end
+  endgenerate
+  
+  // Block level signals for second row
+  assign C[1] = RG1[0];
+  assign RG2[0] = RG1[1] | (RP1[1] & Cin);
+  assign RG2[1] = RG1[2] | (RP1[2] & RG1[0]);
+  generate
+    for (i = 2; i < 14; i = i + 1) begin
+      assign RG2[i] = RG1[i+1] | (RP1[i+1] & RG1[i-1]);
+      assign RP2[i] = RP1[i+1] & RP1[i-1];
+    end
+  endgenerate
+  
+  // Block level signals for third row
+  assign C[2] = RG2[0];
+  assign C[3] = RG2[1];
+  assign RG3[0] = RG2[2] | (RP2[2] & Cin);
+  assign RG3[1] = RG2[3] | (RP2[3] & RG1[0]);
+  assign RG3[2] = RG2[4] | (RP2[4] & RG2[0]);
+  assign RG3[3] = RG2[5] | (RP2[5] & RG2[1]);
+  generate
+    for (i = 4; i < 12; i = i + 1) begin
+      assign RG3[i] = RG2[i+2] | (RP2[i+2] & RG2[i-2]);
+      assign RP3[i] = RP2[i+2] & RP2[i-2];
+    end
+  endgenerate
+  
+  // Block level signals for fourth row
+  assign C[4] = RG3[0];
+  assign C[5] = RG3[1];
+  assign C[6] = RG3[2];
+  assign C[7] = RG3[3];
+  assign RG4[0] = RG3[4] | (RP3[4] & Cin);
+  assign RG4[1] = RG3[5] | (RP3[5] & RG1[0]);
+  assign RG4[2] = RG3[6] | (RP3[6] & RG2[0]);
+  assign RG4[3] = RG3[7] | (RP3[7] & RG2[1]);
+  assign RG4[4] = RG3[8] | (RP3[8] & RG3[0]);
+  assign RG4[5] = RG3[9] | (RP3[9] & RG3[1]);
+  assign RG4[6] = RG3[10] | (RP3[10] & RG3[2]);
+  assign RG4[7] = RG3[11] | (RP3[11] & RG3[3]);
+  generate
+    for (i = 8; i < 16; i = i + 1) begin
+      assign C[i] = RG4[i-8];
+    end
+  endgenerate
+  
+  // Final Computations
+  assign S = C ^ P;
+  assign Cout = G[15] | (P[15] & RG4[7]);
+  
+endmodule
