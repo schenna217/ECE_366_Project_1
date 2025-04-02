@@ -29,11 +29,10 @@ end_fib:
     move $v0, $t1    # result = b
     la $t1, result   # load address of result into $t1
     sw $v0, 0($t1)   # store result into address
-    li $v0, 10       # system call for exit
-    syscall
+    j DONE
     
 return_n:
     la $t1, result   # Load address of result
     sw $a0, 0($t1)   # Store n in result
-    li $v0, 10       # system call for exit
-    syscall
+ 
+DONE:
